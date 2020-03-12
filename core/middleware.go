@@ -119,6 +119,8 @@ func CreateLogger() ([]grpc_logrus.Option, *logrus.Entry) {
 		grpc_logrus.WithLevels(customFunc),
 	}
 
+	grpc_logrus.ReplaceGrpcLogger(logrusEntry)
+
 	return opts, logrusEntry
 }
 
