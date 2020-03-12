@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 
 	runtime "github.com/grpc-ecosystem/grpc-gateway/runtime"
@@ -19,9 +20,12 @@ func RunHTTP(init func() error, registerHandler func(ctx context.Context, mux *r
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
+	log.Println("masuk")
 	mux := runtime.NewServeMux()
 	opts := []grpc.DialOption{grpc.WithInsecure()}
 	err := registerHandler(ctx, mux, fmt.Sprintf("%s:%s", GRPCAddress, GRPCPort), opts)
+
+	log.Println("masuk")
 	if err != nil {
 		return err
 	}
