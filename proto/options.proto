@@ -2,6 +2,10 @@ syntax = "proto3";
 
 import "google/protobuf/descriptor.proto";
 
+extend google.protobuf.ServiceOptions {
+    string withelist = 50067;
+}
+
 extend google.protobuf.MethodOptions {
     string httpMode = 50056;
     string agregator = 50062;
@@ -20,4 +24,5 @@ extend google.protobuf.FieldOptions {
     string required_type = 50061;
     bool fulltext = 50063;
     string errDesc = 50065;
+    string foreignKey = 50066;
 }
