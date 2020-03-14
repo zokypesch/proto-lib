@@ -63,11 +63,24 @@ func ConvertCamelToUnderscore(s string) string {
 }
 
 // SplitParamsToMap for spliting array of string to map
-func SplitParamsToMap(param []string) map[string]string {
+func SplitParamsToMap(param string, splitBy string) []string {
+	res := []string{}
+
+	splt := strings.Split(param, splitBy)
+
+	for _, v := range splt {
+		res = append(res, v)
+	}
+
+	return res
+}
+
+// SplitSliceParamsToMap for spliting array of string to map
+func SplitSliceParamsToMap(param []string, splitBy string) map[string]string {
 	res := make(map[string]string)
 
 	for _, v := range param {
-		splt := strings.Split(v, "=")
+		splt := strings.Split(v, splitBy)
 		if len(splt) < 2 {
 			continue
 		}
