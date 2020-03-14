@@ -16,3 +16,10 @@ func GetPath() string {
 
 	return filePath
 }
+
+//GetFullPath for get path
+func GetFullPath() string {
+	filePath, _ := filepath.Abs("./")
+
+	return filePath
+}
