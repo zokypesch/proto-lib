@@ -76,3 +76,35 @@ func SplitParamsToMap(param []string) map[string]string {
 
 	return res
 }
+
+// UcFirst for first to Upper
+func UcFirst(s string) string {
+	if s == "" {
+		return s
+	}
+	r := []rune(s)
+	r[0] = unicode.ToUpper(r[0])
+	return string(r)
+}
+
+// ConvertUnderscoreToCamel for convert it
+func ConvertUnderscoreToCamel(s string) string {
+	splitV := strings.Split(s, "_")
+	result := ""
+
+	for _, v := range splitV {
+		result += UcFirst(v)
+	}
+
+	return result
+}
+
+// ToLowerFirst for lower all character first
+func ToLowerFirst(s string) string {
+	if s == "" {
+		return s
+	}
+	r := []rune(s)
+	r[0] = unicode.ToLower(r[0])
+	return string(r)
+}
