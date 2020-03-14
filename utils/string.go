@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"strings"
 	"unicode"
 	"unicode/utf8"
 )
@@ -59,4 +60,19 @@ func ConvertCamelToUnderscore(s string) string {
 		b.write(m)
 	}
 	return string(b.r)
+}
+
+// SplitParamsToMap for spliting array of string to map
+func SplitParamsToMap(param []string) map[string]string {
+	res := make(map[string]string)
+
+	for _, v := range param {
+		splt := strings.Split(v, "=")
+		if len(splt) < 2 {
+			continue
+		}
+		res[splt[0]] = splt[1]
+	}
+
+	return res
 }
