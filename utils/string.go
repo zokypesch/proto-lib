@@ -1,9 +1,13 @@
 package utils
 
 import (
+	"math/rand"
 	"strings"
+	"time"
 	"unicode"
 	"unicode/utf8"
+
+	"github.com/oklog/ulid"
 )
 
 type buffer struct {
@@ -120,4 +124,14 @@ func ToLowerFirst(s string) string {
 	r := []rune(s)
 	r[0] = unicode.ToLower(r[0])
 	return string(r)
+}
+
+// GenerateRandomUID for generate random string
+func GenerateRandomUID() (string, error) {
+	t := time.Unix(1000000, 0)
+	entropy := ulid.Monotonic(rand.New(rand.NewSource(t.UnixNano())), 0)
+
+	res := ulid.MustNew(ulid.Timestamp(t), entropy)
+
+	return res.String(), nil
 }
