@@ -26,7 +26,14 @@ extend google.protobuf.FieldOptions {
     bool fulltext = 50063;
     string errDesc = 50065;
     string foreignKey = 50066;
-    bool grpcMethod  = 50068;
+    bool integration = 50068;
     string protoFileLoc = 50069;
-    string grpcAddress = 50070;
+    string grpcMethod  = 50070;
+    string grpcAddress = 50071;
+    string protoDomain = 50072;
+    string grpcPort = 50073;
+    string grpcRequestName = 50074;
+    string grpcResponseName = 50075;
+    string grpcRequestMessage = 50076;
+    string grpcResponseMessage = 50077;
 }
