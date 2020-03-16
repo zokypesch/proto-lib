@@ -128,7 +128,8 @@ func ToLowerFirst(s string) string {
 
 // GenerateRandomUID for generate random string
 func GenerateRandomUID() (string, error) {
-	t := time.Unix(1000000, 0)
+	// t := time.Unix(1000000, 0)
+	t := time.Now()
 	entropy := ulid.Monotonic(rand.New(rand.NewSource(t.UnixNano())), 0)
 
 	res := ulid.MustNew(ulid.Timestamp(t), entropy)
