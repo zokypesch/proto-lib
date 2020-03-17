@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"regexp"
 
 	proto "github.com/golang/protobuf/proto"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -78,17 +79,25 @@ func LocalForward(ctx context.Context, mux *runtime.ServeMux, marshaler runtime.
 	}
 }
 
+var re = regexp.MustCompile("\\[(.*?)\\]")
+
 // CustomHTTPError for hadling custom message error
 func CustomHTTPError(ctx context.Context, _ *runtime.ServeMux, marshaler runtime.Marshaler, w http.ResponseWriter, _ *http.Request, err error) {
 	const fallback = `{"message": "failed to marshal error message", "success": false}`
 
 	w.Header().Set("Content-type", marshaler.ContentType())
 	w.WriteHeader(runtime.HTTPStatusFromCode(grpc.Code(err)))
+	code := "9999"
+	errString := grpc.ErrorDesc(err)
+	findErrorCode := re.FindStringSubmatch(errString)
 
+	if len(findErrorCode) > 0 {
+		code = findErrorCode[1]
+	}
 	jErr := json.NewEncoder(w).Encode(errorBody{
 		Err:     grpc.ErrorDesc(err),
 		Success: false,
-		Code:    "9999",
+		Code:    code,
 	})
 
 	if jErr != nil {
