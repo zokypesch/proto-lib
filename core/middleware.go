@@ -149,3 +149,22 @@ func RegisterGRPC(whiteList []string, APIPassword string) *grpc.Server {
 	)
 	return server
 }
+
+// RegisterGRPCWithInterceptor for registration GRPC
+func RegisterGRPCWithInterceptor(interceptor ...grpc.UnaryServerInterceptor) *grpc.Server {
+	opts, logrusEntry := CreateLogger()
+
+	intercep := append(interceptor,
+		grpc_ctxtags.UnaryServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
+		grpc_logrus.UnaryServerInterceptor(logrusEntry, opts...),
+	)
+
+	server := grpc.NewServer(
+		grpc.UnaryInterceptor(
+			grpc_middleware.ChainUnaryServer(
+				intercep...,
+			),
+		),
+	)
+	return server
+}
