@@ -26,6 +26,7 @@ extend google.protobuf.FieldOptions {
     bool fulltext = 50063;
     string errDesc = 50065;
     string foreignKey = 50066;
+    string associateKey = 50078;
     bool integration = 50068;
     string protoFileLoc = 50069;
     string grpcMethod  = 50070;
