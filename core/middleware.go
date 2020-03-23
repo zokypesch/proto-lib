@@ -89,6 +89,10 @@ func CustomHTTPError(ctx context.Context, _ *runtime.ServeMux, marshaler runtime
 	const fallback = `{"message": "failed to marshal error message", "success": false}`
 
 	w.Header().Set("Content-type", marshaler.ContentType())
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+	w.Header().Set("Access-Control-Allow-Methods", "OPTIONS, POST, GET, PUT, DELETE, PATCH")
+
 	w.WriteHeader(runtime.HTTPStatusFromCode(grpc.Code(err)))
 	code := "9999"
 	errString := grpc.ErrorDesc(err)
