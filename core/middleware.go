@@ -103,7 +103,7 @@ func CustomHTTPError(ctx context.Context, _ *runtime.ServeMux, marshaler runtime
 	errWithoutCode := errString
 	if len(findErrorCode) > 0 {
 		code = findErrorCode[1]
-		errWithoutCode = strings.Replace(errString, fmt.Sprintf("[%s]", code), "", -1)
+		errWithoutCode = strings.TrimSpace(strings.Replace(errString, fmt.Sprintf("[%s]", code), "", -1))
 	}
 	jErr := json.NewEncoder(w).Encode(errorBody{
 		Err:     errWithoutCode,
