@@ -3,9 +3,11 @@ package core
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 
 	proto "github.com/golang/protobuf/proto"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -38,9 +40,9 @@ type successResponse struct {
 // LocalForward for handling localforward append message
 func LocalForward(ctx context.Context, mux *runtime.ServeMux, marshaler runtime.Marshaler, w http.ResponseWriter, req *http.Request, resp proto.Message, opts ...func(context.Context, http.ResponseWriter, proto.Message) error) {
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	w.Header().Set("Access-Control-Allow-Methods", "OPTIONS, POST, GET, PUT, DELETE, PATCH")
+	// w.Header().Set("Access-Control-Allow-Origin", "*")
+	// w.Header().Set("Access-Control-Allow-Credentials", "true")
+	// w.Header().Set("Access-Control-Allow-Methods", "OPTIONS, POST, GET, PUT, DELETE, PATCH")
 
 	var buf []byte
 	var err error
@@ -89,20 +91,22 @@ func CustomHTTPError(ctx context.Context, _ *runtime.ServeMux, marshaler runtime
 	const fallback = `{"message": "failed to marshal error message", "success": false}`
 
 	w.Header().Set("Content-type", marshaler.ContentType())
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	w.Header().Set("Access-Control-Allow-Methods", "OPTIONS, POST, GET, PUT, DELETE, PATCH")
+	// w.Header().Set("Access-Control-Allow-Origin", "*")
+	// w.Header().Set("Access-Control-Allow-Credentials", "true")
+	// w.Header().Set("Access-Control-Allow-Methods", "OPTIONS, POST, GET, PUT, DELETE, PATCH")
 
 	w.WriteHeader(runtime.HTTPStatusFromCode(grpc.Code(err)))
 	code := "9999"
 	errString := grpc.ErrorDesc(err)
 	findErrorCode := re.FindStringSubmatch(errString)
 
+	errWithoutCode := errString
 	if len(findErrorCode) > 0 {
 		code = findErrorCode[1]
+		errWithoutCode = strings.Replace(errString, fmt.Sprintf("[%s]", code), "", -1)
 	}
 	jErr := json.NewEncoder(w).Encode(errorBody{
-		Err:     grpc.ErrorDesc(err),
+		Err:     errWithoutCode,
 		Success: false,
 		Code:    code,
 	})
