@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"fmt"
 
 	meta "google.golang.org/grpc/metadata"
 )
@@ -26,15 +27,15 @@ func GetTokenFromCtx(ctx context.Context) (string, bool) {
 	return "cannot get token", false
 }
 
-// GetXTokenFromCtx for get token from context
-func GetXTokenFromCtx(ctx context.Context) (string, bool) {
+// GetXCustomKeyFromCtx for get token from context
+func GetXCustomKeyFromCtx(ctx context.Context, key string) (string, bool) {
 	md, ok := meta.FromIncomingContext(ctx)
 
 	if ok {
-		v, okToken := md["x-internal-token"]
+		v, okToken := md[key]
 
 		if !okToken {
-			return "auth not found", false
+			return fmt.Sprintf("%s not found", key), false
 		}
 
 		if len(v) == 0 {
@@ -43,5 +44,5 @@ func GetXTokenFromCtx(ctx context.Context) (string, bool) {
 
 		return v[0], true
 	}
-	return "cannot get token", false
+	return fmt.Sprintf("cannot get %s", key), false
 }
