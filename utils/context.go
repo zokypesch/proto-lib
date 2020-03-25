@@ -25,3 +25,23 @@ func GetTokenFromCtx(ctx context.Context) (string, bool) {
 	}
 	return "cannot get token", false
 }
+
+// GetXTokenFromCtx for get token from context
+func GetXTokenFromCtx(ctx context.Context) (string, bool) {
+	md, ok := meta.FromIncomingContext(ctx)
+
+	if ok {
+		v, okToken := md["x-internal-token"]
+
+		if !okToken {
+			return "auth not found", false
+		}
+
+		if len(v) == 0 {
+			return "zero length of context", false
+		}
+
+		return v[0], true
+	}
+	return "cannot get token", false
+}
