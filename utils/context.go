@@ -46,3 +46,18 @@ func GetXCustomKeyFromCtx(ctx context.Context, key string) (string, bool) {
 	}
 	return fmt.Sprintf("cannot get %s", key), false
 }
+
+// OutgoingContext for outgoing context
+func OutgoingContext(ctx context.Context, params map[string]string) context.Context {
+	mdReceive, okReceive := meta.FromIncomingContext(ctx)
+	if !okReceive {
+		return ctx
+	}
+
+	for k, v := range params {
+		mdReceive.Append(k, v)
+	}
+	ctxPass := context.TODO()
+	newCtx := meta.NewIncomingContext(ctxPass, mdReceive)
+	return newCtx
+}
