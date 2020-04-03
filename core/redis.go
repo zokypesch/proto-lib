@@ -18,6 +18,7 @@ type CacheService interface {
 	Set(key string, value []byte, ttl int64) error
 	Exists(key string) (bool, error)
 	Delete(key string) error
+	Increment(key string) (int64, error)
 }
 
 var cache CacheService
@@ -117,6 +118,19 @@ func (cache *Cache) Exists(key string) (bool, error) {
 	defer conn.Close()
 
 	ok, err := redis.Bool(conn.Do("EXISTS", key))
+	if err != nil {
+		return ok, fmt.Errorf("error checking if key %s exists: %v", key, err)
+	}
+	return ok, err
+}
+
+// Increment check key is exist
+func (cache *Cache) Increment(key string) (int64, error) {
+
+	conn := cache.Pool.Get()
+	defer conn.Close()
+
+	ok, err := redis.Int64(conn.Do("INCR", key))
 	if err != nil {
 		return ok, fmt.Errorf("error checking if key %s exists: %v", key, err)
 	}
