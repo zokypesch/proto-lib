@@ -148,21 +148,34 @@ func CreateLogger() ([]grpc_logrus.Option, *logrus.Entry) {
 	return opts, logrusEntry
 }
 
+// AppendInterceptor for default register
+func AppendInterceptor(interceptor ...grpc.UnaryServerInterceptor) []grpc.UnaryServerInterceptor {
+
+	// server := grpc.NewServer(
+	// 	grpc.UnaryInterceptor(
+	// 		grpc_middleware.ChainUnaryServer(
+	// 			grpc_ctxtags.UnaryServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
+	// 			grpc_logrus.UnaryServerInterceptor(logrusEntry, opts...),
+	// 			interceptor,
+	// 		),
+	// 	),
+	// )
+	opts, logrusEntry := CreateLogger()
+
+	intercep := append(interceptor,
+		grpc_ctxtags.UnaryServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
+		grpc_logrus.UnaryServerInterceptor(logrusEntry, opts...),
+	)
+
+	return intercep
+}
+
 // RegisterGRPC for registration GRPC
 func RegisterGRPC(whiteList []string, APIPassword string) *grpc.Server {
-	opts, logrusEntry := CreateLogger()
 	auth := NewAuthInterceptor(APIPassword)
 	interceptor := auth.GetUnaryCustom(whiteList)
-	server := grpc.NewServer(
-		grpc.UnaryInterceptor(
-			grpc_middleware.ChainUnaryServer(
-				grpc_ctxtags.UnaryServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
-				grpc_logrus.UnaryServerInterceptor(logrusEntry, opts...),
-				interceptor,
-			),
-		),
-	)
-	return server
+
+	return RegisterGRPCWithInterceptor(interceptor)
 }
 
 var (
@@ -183,6 +196,22 @@ func initProm(svcName string) {
 	// Register standard server metrics and customized metrics to registry.
 	reg.MustRegister(grpcMetrics, customizedCounterMetric)
 	customizedCounterMetric.WithLabelValues(svcName + "_counter")
+}
+
+// RegisterGRPCWithPrometh for get unnary prometheus
+func RegisterGRPCWithPrometh(interceptor ...grpc.UnaryServerInterceptor) *grpc.Server {
+	intercep := AppendInterceptor(interceptor...)
+	server := grpc.NewServer(
+		grpc.UnaryInterceptor(
+			grpc_middleware.ChainUnaryServer(
+				intercep...,
+			),
+		),
+		grpc.StreamInterceptor(grpcMetrics.StreamServerInterceptor()),
+		grpc.UnaryInterceptor(grpcMetrics.UnaryServerInterceptor()),
+	)
+	return server
+
 }
 
 // RegisterPrometheus for registration prometheus
