@@ -205,6 +205,7 @@ func RegisterGRPCWithPrometh(interceptor ...grpc.UnaryServerInterceptor) *grpc.S
 	intercep := append(interceptor,
 		grpc_ctxtags.UnaryServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
 		grpc_logrus.UnaryServerInterceptor(logrusEntry, opts...),
+		grpcMetrics.UnaryServerInterceptor(),
 	)
 
 	server := grpc.NewServer(
@@ -214,7 +215,6 @@ func RegisterGRPCWithPrometh(interceptor ...grpc.UnaryServerInterceptor) *grpc.S
 			),
 		),
 		grpc.StreamInterceptor(grpcMetrics.StreamServerInterceptor()),
-		grpc.UnaryInterceptor(grpcMetrics.UnaryServerInterceptor()),
 	)
 	return server
 
