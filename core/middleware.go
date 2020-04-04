@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"regexp"
@@ -13,7 +14,10 @@ import (
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
+	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	runtime "github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	logrus "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -159,6 +163,43 @@ func RegisterGRPC(whiteList []string, APIPassword string) *grpc.Server {
 		),
 	)
 	return server
+}
+
+var (
+	// Create a metrics registry.
+	reg = prometheus.NewRegistry()
+
+	// Create some standard server metrics.
+	grpcMetrics = grpc_prometheus.NewServerMetrics()
+)
+
+func initProm(svcName string) {
+	// Create a customized counter metric.
+	customizedCounterMetric := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: svcName,
+		Help: "Total number of RPCs handled on the server.",
+	}, []string{"name"})
+
+	// Register standard server metrics and customized metrics to registry.
+	reg.MustRegister(grpcMetrics, customizedCounterMetric)
+	customizedCounterMetric.WithLabelValues(svcName + "_counter")
+}
+
+// RegisterPrometheus for registration prometheus
+func RegisterPrometheus(server *grpc.Server, srvName string) {
+	// Initialize all metrics.
+	grpcMetrics.InitializeMetrics(server)
+
+	initProm(srvName)
+	httpServer := &http.Server{Handler: promhttp.HandlerFor(reg, promhttp.HandlerOpts{}), Addr: fmt.Sprintf("0.0.0.0:%d", 9092)}
+
+	// Start your http server for prometheus.
+	go func() {
+		if err := httpServer.ListenAndServe(); err != nil {
+			log.Fatal("Unable to start a http server.")
+		}
+	}()
+
 }
 
 // RegisterGRPCWithInterceptor for registration GRPC
