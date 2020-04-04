@@ -200,7 +200,13 @@ func initProm(svcName string) {
 
 // RegisterGRPCWithPrometh for get unnary prometheus
 func RegisterGRPCWithPrometh(interceptor ...grpc.UnaryServerInterceptor) *grpc.Server {
-	intercep := AppendInterceptor(interceptor...)
+	opts, logrusEntry := CreateLogger()
+
+	intercep := append(interceptor,
+		grpc_ctxtags.UnaryServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
+		grpc_logrus.UnaryServerInterceptor(logrusEntry, opts...),
+	)
+
 	server := grpc.NewServer(
 		grpc.UnaryInterceptor(
 			grpc_middleware.ChainUnaryServer(
