@@ -10,7 +10,7 @@ import (
 )
 
 // InitDB for initial database
-func InitDB(address string, dbName string, user string, password string, DBPort int) *gorm.DB {
+func InitDB(address string, dbName string, user string, password string, DBPort int, logMode bool) *gorm.DB {
 	dbUser := user
 	dbPass := password
 	dbEndpoint := address
@@ -22,7 +22,7 @@ func InitDB(address string, dbName string, user string, password string, DBPort 
 		panic(err)
 	}
 
-	db.LogMode(true)
+	db.LogMode(logMode)
 	db.DB().SetConnMaxLifetime(time.Minute * time.Duration(10))
 	db.DB().SetMaxIdleConns(5)
 	db.DB().SetMaxOpenConns(50)
