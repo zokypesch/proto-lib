@@ -187,11 +187,15 @@ var (
 	grpcMetrics = grpc_prometheus.NewServerMetrics()
 
 	// Create a customized counter metric.
+	customizedCounterMetric *prometheus.CounterVec
+)
+
+func registerCustomizeMetrics(svc string) {
 	customizedCounterMetric = prometheus.NewCounterVec(prometheus.CounterOpts{
-		Name: serviceName,
+		Name: svc,
 		Help: "Total number of RPCs handled on the server.",
 	}, []string{"name"})
-)
+}
 
 func initProm() {
 	// Register standard server metrics and customized metrics to registry.
@@ -201,7 +205,10 @@ func initProm() {
 
 // RegisterGRPCWithPrometh for get unnary prometheus
 func RegisterGRPCWithPrometh(srvName string, interceptor ...grpc.UnaryServerInterceptor) *grpc.Server {
+	registerCustomizeMetrics(srvName)
+
 	serviceName = srvName + "_counter"
+
 	newIntercep := append(interceptor,
 		grpcMetrics.UnaryServerInterceptor(),
 		GetUnaryCounter(serviceName),
