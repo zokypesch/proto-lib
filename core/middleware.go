@@ -182,26 +182,29 @@ var (
 	// Create a metrics registry.
 	reg = prometheus.NewRegistry()
 
+	serviceName = ""
 	// Create some standard server metrics.
 	grpcMetrics = grpc_prometheus.NewServerMetrics()
-)
 
-func initProm(svcName string) {
 	// Create a customized counter metric.
-	customizedCounterMetric := prometheus.NewCounterVec(prometheus.CounterOpts{
-		Name: svcName,
+	customizedCounterMetric = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: serviceName,
 		Help: "Total number of RPCs handled on the server.",
 	}, []string{"name"})
+)
 
+func initProm() {
 	// Register standard server metrics and customized metrics to registry.
 	reg.MustRegister(grpcMetrics, customizedCounterMetric)
-	customizedCounterMetric.WithLabelValues(svcName + "_counter")
+	customizedCounterMetric.WithLabelValues(serviceName)
 }
 
 // RegisterGRPCWithPrometh for get unnary prometheus
-func RegisterGRPCWithPrometh(interceptor ...grpc.UnaryServerInterceptor) *grpc.Server {
+func RegisterGRPCWithPrometh(srvName string, interceptor ...grpc.UnaryServerInterceptor) *grpc.Server {
+	serviceName = srvName + "_counter"
 	newIntercep := append(interceptor,
 		grpcMetrics.UnaryServerInterceptor(),
+		GetUnaryCounter(serviceName),
 	)
 	intercep := AppendInterceptor(newIntercep...)
 	server := grpc.NewServer(
@@ -217,11 +220,12 @@ func RegisterGRPCWithPrometh(interceptor ...grpc.UnaryServerInterceptor) *grpc.S
 }
 
 // RegisterPrometheus for registration prometheus
-func RegisterPrometheus(server *grpc.Server, srvName string) {
+func RegisterPrometheus(server *grpc.Server) {
+	initProm()
+
 	// Initialize all metrics.
 	grpcMetrics.InitializeMetrics(server)
 
-	initProm(srvName)
 	httpServer := &http.Server{Handler: promhttp.HandlerFor(reg, promhttp.HandlerOpts{}), Addr: fmt.Sprintf("0.0.0.0:%d", 9092)}
 
 	// Start your http server for prometheus.
