@@ -171,11 +171,11 @@ func AppendInterceptor(interceptor ...grpc.UnaryServerInterceptor) []grpc.UnaryS
 }
 
 // RegisterGRPC for registration GRPC
-func RegisterGRPC(whiteList []string, APIPassword string) *grpc.Server {
+func RegisterGRPC(srvName string, whiteList []string, APIPassword string) *grpc.Server {
 	auth := NewAuthInterceptor(APIPassword)
 	interceptor := auth.GetUnaryCustom(whiteList)
 
-	return RegisterGRPCWithInterceptor(interceptor)
+	return RegisterGRPCWithInterceptor(srvName, interceptor)
 }
 
 var (
@@ -245,12 +245,17 @@ func RegisterPrometheus(server *grpc.Server) {
 }
 
 // RegisterGRPCWithInterceptor for registration GRPC
-func RegisterGRPCWithInterceptor(interceptor ...grpc.UnaryServerInterceptor) *grpc.Server {
+func RegisterGRPCWithInterceptor(srvName string, interceptor ...grpc.UnaryServerInterceptor) *grpc.Server {
 	opts, logrusEntry := CreateLogger()
+	registerCustomizeMetrics(srvName)
+
+	serviceName = srvName + "_counter"
 
 	intercep := append(interceptor,
 		grpc_ctxtags.UnaryServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
 		grpc_logrus.UnaryServerInterceptor(logrusEntry, opts...),
+		grpcMetrics.UnaryServerInterceptor(),
+		GetUnaryCounter(serviceName),
 	)
 
 	server := grpc.NewServer(
@@ -259,6 +264,7 @@ func RegisterGRPCWithInterceptor(interceptor ...grpc.UnaryServerInterceptor) *gr
 				intercep...,
 			),
 		),
+		grpc.StreamInterceptor(grpcMetrics.StreamServerInterceptor()),
 	)
 	return server
 }
