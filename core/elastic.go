@@ -3,8 +3,9 @@ package core
 import (
 	"context"
 	"fmt"
-	elastic "gopkg.in/olivere/elastic.v5"
 	"log"
+
+	elastic "gopkg.in/olivere/elastic.v5"
 )
 
 // ESCore for struct information
@@ -20,7 +21,7 @@ type ESModule interface {
 	CreateIndex(ctx context.Context) error
 	AddDocument(ctx context.Context, ID string, body interface{}) error
 	GetQueryTerm(key string, value interface{}) *elastic.TermQuery
-	Query(ctx context.Context, termQuery *elastic.TermQuery, boolQuery *elastic.BoolQuery, offset int, size int, sortBy string, asc bool) ([]*elastic.SearchHit, int, error)
+	Query(ctx context.Context, termQuery *elastic.TermQuery, boolQuery *elastic.BoolQuery, agg map[string]elastic.Aggregation, offset int, size int, sortBy string, asc bool) ([]*elastic.SearchHit, int, error)
 	DeleteDocumentByID(ctx context.Context, ID string) error
 	UpdateDocument(ctx context.Context, ID string, script []*elastic.Script, upsert map[string]interface{}) (int, error)
 	GetScriptLine(condition string, paramKey string, paramValue interface{}) *elastic.Script
@@ -34,6 +35,8 @@ type ESModule interface {
 	GetNewMatchQuery(key string, value interface{}) *elastic.MatchQuery
 	QueryCount(boolQuery *elastic.BoolQuery) (int64, error)
 	GetNewRangeQuery(key string, from interface{}, end interface{}) *elastic.RangeQuery
+	BuildAggregation(params map[string]string) map[string]elastic.Aggregation
+	BulkAddDocument(ctx context.Context, IDs []string, body []interface{}) error
 }
 
 // NewEsCore func for create new ES CORE
@@ -98,6 +101,19 @@ func (es *ESCore) AddDocument(ctx context.Context, ID string, body interface{}) 
 	return err
 }
 
+// BulkAddDocument for adding document in elastic search
+func (es *ESCore) BulkAddDocument(ctx context.Context, IDs []string, body []interface{}) error {
+	bulkRequest := es.client.Bulk()
+	for k, v := range body {
+		ID := IDs[k]
+		req := elastic.NewBulkIndexRequest().Index(es.indexName).Type(es.typeIndex).Id(ID).Doc(v)
+		bulkRequest = bulkRequest.Add(req)
+	}
+	_, err := bulkRequest.Do()
+
+	return err
+}
+
 // GetBoolQuery for get boolquery
 func (es *ESCore) GetBoolQuery(termQuery ...elastic.Query) *elastic.BoolQuery {
 	boolQueryNew := elastic.NewBoolQuery()
@@ -137,7 +153,7 @@ func (es *ESCore) GetNewMatchQuery(key string, value interface{}) *elastic.Match
 
 // Query for query data
 func (es *ESCore) Query(ctx context.Context, termQuery *elastic.TermQuery,
-	boolQuery *elastic.BoolQuery, offset int, size int, sortBy string, asc bool) ([]*elastic.SearchHit, int, error) {
+	boolQuery *elastic.BoolQuery, agg map[string]elastic.Aggregation, offset int, size int, sortBy string, asc bool) ([]*elastic.SearchHit, int, error) {
 
 	query := es.client.Search().
 		Index(es.indexName).
@@ -146,6 +162,11 @@ func (es *ESCore) Query(ctx context.Context, termQuery *elastic.TermQuery,
 		From(offset).Size(size). // take documents by param
 		Pretty(true)             // pretty print request and response JSON
 
+	for kAgg, vAgg := range agg {
+		if vAgg != nil {
+			query.Aggregation(kAgg, vAgg)
+		}
+	}
 	if termQuery != nil {
 		query.Query(termQuery)
 	}
@@ -270,4 +291,29 @@ func (es *ESCore) GetByID(ctx context.Context, ID string) (*elastic.GetResult, e
 // GetClient for get client es
 func (es *ESCore) GetClient() *elastic.Client {
 	return es.client
+}
+
+// GetQuerryAggregation for get query agregaton
+func (es *ESCore) GetQuerryAggregation(typ string, fieldName string) elastic.Aggregation {
+	var res elastic.Aggregation
+
+	switch typ {
+	case "sum":
+		res = elastic.NewSumAggregation().Field(fieldName)
+	}
+
+	return res
+}
+
+// BuildAggregation for build query aggregation
+func (es *ESCore) BuildAggregation(params map[string]string) map[string]elastic.Aggregation {
+	res := make(map[string]elastic.Aggregation, len(params))
+
+	// how to call ?
+	// please put params map[string]string{"myfieild": "sum"}
+	for k, v := range params {
+		res[fmt.Sprintf("%s%s", v, k)] = es.GetQuerryAggregation(v, k)
+	}
+
+	return res
 }
