@@ -2,12 +2,14 @@ package utils
 
 import (
 	"math/rand"
+	"strconv"
 	"strings"
 	"time"
 	"unicode"
 	"unicode/utf8"
 
 	"github.com/oklog/ulid"
+	"github.com/sony/sonyflake"
 )
 
 type buffer struct {
@@ -135,4 +137,12 @@ func GenerateRandomUID() (string, error) {
 	res := ulid.MustNew(ulid.Timestamp(t), entropy)
 
 	return res.String(), nil
+}
+
+// GenerateSflake for random
+func GenerateSflake() (string, error) {
+	flake := sonyflake.NewSonyflake(sonyflake.Settings{})
+	id, err := flake.NextID()
+
+	return strconv.FormatUint(uint64(id), 16), err
 }

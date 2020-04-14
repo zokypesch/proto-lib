@@ -10,14 +10,6 @@
   version = "v1.0.1"
 
 [[projects]]
-  digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
-  name = "github.com/davecgh/go-spew"
-  packages = ["spew"]
-  pruneopts = "UT"
-  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
-  version = "v1.1.1"
-
-[[projects]]
   digest = "1:76dc72490af7174349349838f2fe118996381b31ea83243812a97e5a0fd5ed55"
   name = "github.com/dgrijalva/jwt-go"
   packages = ["."]
@@ -159,14 +151,6 @@
   version = "v0.9.1"
 
 [[projects]]
-  digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
-  name = "github.com/pmezard/go-difflib"
-  packages = ["difflib"]
-  pruneopts = "UT"
-  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
-  version = "v1.0.0"
-
-[[projects]]
   digest = "1:eb04f69c8991e52eff33c428bd729e04208bf03235be88e4df0d88497c6861b9"
   name = "github.com/prometheus/client_golang"
   packages = [
@@ -219,12 +203,12 @@
   version = "v1.4.2"
 
 [[projects]]
-  digest = "1:5e8f46b412421d2d6cceea845d28ac46f3f5a5f60a6e86f0ee75e24fd43a02a9"
-  name = "github.com/stretchr/testify"
-  packages = ["assert"]
+  digest = "1:58e8badce16b76e70da504f85ab2049f092644abeebc55e1437be5f6f544a61b"
+  name = "github.com/sony/sonyflake"
+  packages = ["."]
   pruneopts = "UT"
-  revision = "3ebf1ddaeb260c4b1ae502a01c7844fa8c1fa0e9"
-  version = "v1.5.1"
+  revision = "4ae3f1aeaadd860acf428bc6ad1cba01d7b6bfd4"
+  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
@@ -349,14 +333,6 @@
   revision = "d00d2ad2f98b5bedbc8da0821338bf8b2c1b695a"
   version = "v5.0.84"
 
-[[projects]]
-  digest = "1:55b110c99c5fdc4f14930747326acce56b52cfce60b24b1c03ef686ac0e46bb1"
-  name = "gopkg.in/yaml.v2"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "53403b58ad1b561927d19068c655246f2db79d48"
-  version = "v2.2.8"
-
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
@@ -376,7 +352,7 @@
     "github.com/prometheus/client_golang/prometheus",
     "github.com/prometheus/client_golang/prometheus/promhttp",
     "github.com/sirupsen/logrus",
-    "github.com/stretchr/testify/assert",
+    "github.com/sony/sonyflake",
     "google.golang.org/grpc",
     "google.golang.org/grpc/codes",
     "google.golang.org/grpc/grpclog",
