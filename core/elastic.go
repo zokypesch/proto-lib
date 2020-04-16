@@ -121,7 +121,12 @@ func (es *ESCore) BulkAddDocument(ctx context.Context, IDs []string, body []inte
 		req := elastic.NewBulkIndexRequest().Index(es.indexName).Type(es.typeIndex).Id(ID).Doc(v)
 		bulkRequest = bulkRequest.Add(req)
 	}
-	_, err := bulkRequest.Do(ctx)
+	// _, err := bulkRequest.Do(ctx)
+	_, err := bulkRequest.
+		Index(es.indexName).
+		Type(es.typeIndex).
+		Refresh("wait_for").
+		Do(ctx)
 
 	return err
 }
