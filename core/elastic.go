@@ -51,6 +51,18 @@ func NewEsCore(clientAddr string, indexName string, mapping string, typeIndex st
 
 }
 
+// NewEsCoreWithSniff func for create new ES CORE
+func NewEsCoreWithSniff(clientAddr string, indexName string, mapping string, typeIndex string, sniff bool) ESModule {
+	client, err := elastic.NewClient(elastic.SetURL(clientAddr), elastic.SetSniff(sniff))
+	if err != nil {
+		// Handle error
+		panic(err)
+	}
+
+	return &ESCore{client, indexName, mapping, typeIndex}
+
+}
+
 // CreateIndex for creating a index
 func (es *ESCore) CreateIndex(ctx context.Context) error {
 
