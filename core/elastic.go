@@ -262,6 +262,23 @@ func (es *ESCore) DeleteDocumentByID(ctx context.Context, ID string) error {
 	return nil
 }
 
+// DeleteDocumentByQuery for delete th elastic search
+func (es *ESCore) DeleteDocumentByQuery(ctx context.Context, boolQuery *elastic.BoolQuery) error {
+	// Delete an index.
+	_, err := es.client.DeleteByQuery().
+		Index(es.indexName).
+		Type(es.typeIndex).
+		Query(boolQuery).
+		Do(ctx)
+
+	if err != nil {
+		// Handle error
+		return err
+	}
+
+	return nil
+}
+
 // GenerateScriptLines for generate scriptlines
 func (es *ESCore) GenerateScriptLines() []*elastic.Script {
 	var res []*elastic.Script
