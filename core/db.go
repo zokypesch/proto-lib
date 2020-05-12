@@ -10,7 +10,7 @@ import (
 )
 
 // InitDB for initial database
-func InitDB(address string, dbName string, user string, password string, DBPort int, logMode bool) *gorm.DB {
+func InitDB(address string, dbName string, user string, password string, DBPort int, logMode bool, maxOpenConn int, maxIdleConn int) *gorm.DB {
 	dbUser := user
 	dbPass := password
 	dbEndpoint := address
@@ -24,8 +24,8 @@ func InitDB(address string, dbName string, user string, password string, DBPort 
 
 	db.LogMode(logMode)
 	db.DB().SetConnMaxLifetime(time.Minute * time.Duration(10))
-	db.DB().SetMaxIdleConns(5)
-	db.DB().SetMaxOpenConns(50)
+	db.DB().SetMaxIdleConns(maxIdleConn)
+	db.DB().SetMaxOpenConns(maxOpenConn)
 	db.SingularTable(true)
 	return db
 }
