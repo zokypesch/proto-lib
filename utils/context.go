@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"google.golang.org/grpc/metadata"
 	meta "google.golang.org/grpc/metadata"
 )
 
@@ -60,4 +61,12 @@ func OutgoingContext(ctx context.Context, params map[string]string) context.Cont
 	ctxPass := context.TODO()
 	newCtx := meta.NewIncomingContext(ctxPass, mdReceive)
 	return newCtx
+}
+
+// NewOutgoingContext for outgoing context
+func NewOutgoingContext(ctx context.Context, params map[string]string) context.Context {
+	mdReceive := meta.New(params)
+
+	outGoing := metadata.NewOutgoingContext(ctx, mdReceive)
+	return outGoing
 }
