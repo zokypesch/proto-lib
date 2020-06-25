@@ -227,13 +227,13 @@ func RegisterGRPCWithPrometh(srvName string, interceptor ...grpc.UnaryServerInte
 }
 
 // RegisterPrometheus for registration prometheus
-func RegisterPrometheus(server *grpc.Server) {
+func RegisterPrometheus(server *grpc.Server, port int64) {
 	initProm()
 
 	// Initialize all metrics.
 	grpcMetrics.InitializeMetrics(server)
 
-	httpServer := &http.Server{Handler: promhttp.HandlerFor(reg, promhttp.HandlerOpts{}), Addr: fmt.Sprintf("0.0.0.0:%d", 9092)}
+	httpServer := &http.Server{Handler: promhttp.HandlerFor(reg, promhttp.HandlerOpts{}), Addr: fmt.Sprintf("0.0.0.0:%d", port)}
 
 	// Start your http server for prometheus.
 	go func() {
