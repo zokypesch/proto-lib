@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  digest = "1:c47f4964978e211c6e566596ec6246c329912ea92e9bb99c00798bb4564c5b09"
+  name = "github.com/armon/go-radix"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "1a2de0c21c94309923825da3df33a4381872c795"
+  version = "v1.0.0"
+
+[[projects]]
   digest = "1:d6afaeed1502aa28e80a4ed0981d570ad91b2579193404256ce672ed0a609e0d"
   name = "github.com/beorn7/perks"
   packages = ["quantile"]
@@ -16,6 +24,31 @@
   pruneopts = "UT"
   revision = "06ea1031745cb8b3dab3f6a236daf2b0aa468b7e"
   version = "v3.2.0"
+
+[[projects]]
+  digest = "1:12c953a7ddd6fd2d4d84165a2f2537e4c2c6c7e7fe0b74296871d2d43a176676"
+  name = "github.com/elastic/go-sysinfo"
+  packages = [
+    ".",
+    "internal/registry",
+    "providers/aix",
+    "providers/darwin",
+    "providers/linux",
+    "providers/shared",
+    "providers/windows",
+    "types",
+  ]
+  pruneopts = "UT"
+  revision = "ddf6bfcb538aa4393a3683e176b96a07fd50d80d"
+  version = "v1.4.0"
+
+[[projects]]
+  digest = "1:1ccb0a9b1971646dcaa9537cce0423a14aaf0643311abb8da753cd59372915d5"
+  name = "github.com/elastic/go-windows"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "8c929792e70203792e3baf128c380e28754ae8b5"
+  version = "v1.0.1"
 
 [[projects]]
   digest = "1:a3af33fd30536d9c5a7b6ad542390919e57c1125097a194c7b3d9904109a0611"
@@ -104,6 +137,14 @@
   pruneopts = "UT"
   revision = "f5c5f50e6090ae76a29240b61ae2a90dd810112e"
   version = "v1.0.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:ca41e6bafdc8d60c47dba38e9adfc75219a2892b09e5c2160161e7b6bf9562c2"
+  name = "github.com/joeshaw/multierror"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "69b34d4ec901851247ae7e77d33909caf9df99ed"
 
 [[projects]]
   digest = "1:31e761d97c76151dde79e9d28964a812c46efc5baee4085b86f68f0c654450de"
@@ -195,6 +236,14 @@
   version = "v0.0.11"
 
 [[projects]]
+  digest = "1:7146d5b587395e3db90e8ed497d138fd0fb04d7e0739e3de60119bbbf6cc78f7"
+  name = "github.com/santhosh-tekuri/jsonschema"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "137f44a49015e5060a447c331aa37de6e0f50267"
+  version = "v2.2.0"
+
+[[projects]]
   digest = "1:04457f9f6f3ffc5fea48e71d62f2ca256637dee0a04d710288e27e05c8b41976"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
@@ -209,6 +258,42 @@
   pruneopts = "UT"
   revision = "4ae3f1aeaadd860acf428bc6ad1cba01d7b6bfd4"
   version = "v1.0.0"
+
+[[projects]]
+  digest = "1:f64e5fe990654f77504dc2f2983eaa90e958ed6a710d21889ca5539f46bc0d3c"
+  name = "go.elastic.co/apm"
+  packages = [
+    ".",
+    "apmconfig",
+    "internal/apmcontext",
+    "internal/apmhostutil",
+    "internal/apmhttputil",
+    "internal/apmlog",
+    "internal/apmschema",
+    "internal/apmstrings",
+    "internal/apmversion",
+    "internal/configutil",
+    "internal/iochan",
+    "internal/pkgerrorsutil",
+    "internal/ringbuffer",
+    "internal/wildcard",
+    "model",
+    "module/apmgrpc",
+    "module/apmhttp",
+    "stacktrace",
+    "transport",
+  ]
+  pruneopts = "UT"
+  revision = "f07b51f3e6132a148b258a72781e6616409fd477"
+  version = "v1.8.0"
+
+[[projects]]
+  digest = "1:65adaec6315f2b4543e781da380f1c7f14a6091b714ff675d93944ee558399b3"
+  name = "go.elastic.co/fastjson"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "dca77b896763302a85d3258e4831cbf893e952e3"
+  version = "v1.1.0"
 
 [[projects]]
   branch = "master"
@@ -228,11 +313,12 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e32edd8d81fe0447cb6855e2d2b0549b63717539513e09b3a1e4bb20d48f46c6"
+  digest = "1:d3f8badaada8e1211795857c9fdaee6fa1725e507876bab15fd74b9b1ed86e95"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
+    "windows/registry",
   ]
   pruneopts = "UT"
   revision = "5c8b2ff67527cb88b770f693cebf3799036d8bc0"
@@ -333,6 +419,14 @@
   revision = "d00d2ad2f98b5bedbc8da0821338bf8b2c1b695a"
   version = "v5.0.84"
 
+[[projects]]
+  branch = "master"
+  digest = "1:b5ead2120cd278858a83be14ef551f54295da350033dbc3f227fe0298b880256"
+  name = "howett.net/plist"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3b63eb3a43b59c776909681ed1fcb412b47d3c9a"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
@@ -353,6 +447,7 @@
     "github.com/prometheus/client_golang/prometheus/promhttp",
     "github.com/sirupsen/logrus",
     "github.com/sony/sonyflake",
+    "go.elastic.co/apm/module/apmgrpc",
     "google.golang.org/grpc",
     "google.golang.org/grpc/codes",
     "google.golang.org/grpc/grpclog",

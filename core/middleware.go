@@ -19,6 +19,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	logrus "github.com/sirupsen/logrus"
+	"go.elastic.co/apm/module/apmgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/grpclog"
@@ -256,6 +257,30 @@ func RegisterGRPCWithInterceptor(srvName string, interceptor ...grpc.UnaryServer
 		grpc_logrus.UnaryServerInterceptor(logrusEntry, opts...),
 		grpcMetrics.UnaryServerInterceptor(),
 		GetUnaryCounter(serviceName),
+	)
+
+	server := grpc.NewServer(
+		grpc.UnaryInterceptor(
+			grpc_middleware.ChainUnaryServer(
+				intercep...,
+			),
+		),
+		grpc.StreamInterceptor(grpcMetrics.StreamServerInterceptor()),
+	)
+	return server
+}
+
+// RegisterGRPCWithARM for registration GRPC With ARM
+func RegisterGRPCWithARM(srvName string, interceptor ...grpc.UnaryServerInterceptor) *grpc.Server {
+	opts, logrusEntry := CreateLogger()
+	registerCustomizeMetrics(srvName)
+
+	serviceName = srvName + "_counter"
+
+	intercep := append(interceptor,
+		grpc_ctxtags.UnaryServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
+		grpc_logrus.UnaryServerInterceptor(logrusEntry, opts...),
+		apmgrpc.NewUnaryServerInterceptor(apmgrpc.WithRecovery()),
 	)
 
 	server := grpc.NewServer(
