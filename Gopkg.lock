@@ -447,6 +447,7 @@
     "github.com/prometheus/client_golang/prometheus/promhttp",
     "github.com/sirupsen/logrus",
     "github.com/sony/sonyflake",
+    "go.elastic.co/apm",
     "go.elastic.co/apm/module/apmgrpc",
     "google.golang.org/grpc",
     "google.golang.org/grpc/codes",
