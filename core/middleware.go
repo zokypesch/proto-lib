@@ -227,6 +227,31 @@ func RegisterGRPCWithPrometh(srvName string, interceptor ...grpc.UnaryServerInte
 
 }
 
+// https://www.elastic.co/guide/en/apm/agent/go/master/builtin-modules.html#builtin-modules-apmgrpc
+// RegisterGRPCWithPromethAndAPM with ap agent too
+func RegisterGRPCWithPromethAndAPM(srvName string, interceptor ...grpc.UnaryServerInterceptor) *grpc.Server {
+	registerCustomizeMetrics(srvName)
+
+	serviceName = srvName + "_counter"
+
+	newIntercep := append(interceptor,
+		grpcMetrics.UnaryServerInterceptor(),
+		GetUnaryCounter(serviceName),
+		apmgrpc.NewUnaryServerInterceptor(apmgrpc.WithRecovery()),
+	)
+	intercep := AppendInterceptor(newIntercep...)
+	server := grpc.NewServer(
+		grpc.UnaryInterceptor(
+			grpc_middleware.ChainUnaryServer(
+				intercep...,
+			),
+		),
+		grpc.StreamInterceptor(grpcMetrics.StreamServerInterceptor()),
+	)
+	return server
+
+}
+
 // RegisterPrometheus for registration prometheus
 func RegisterPrometheus(server *grpc.Server, port int64) {
 	initProm()
