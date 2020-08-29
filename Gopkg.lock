@@ -260,7 +260,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:f64e5fe990654f77504dc2f2983eaa90e958ed6a710d21889ca5539f46bc0d3c"
+  digest = "1:d73a2852be2bfa3fcadf523a1fd9d9941299b6ce0ee7700ccae98f793290178e"
   name = "go.elastic.co/apm"
   packages = [
     ".",
@@ -280,6 +280,7 @@
     "model",
     "module/apmgrpc",
     "module/apmhttp",
+    "module/apmlogrus",
     "stacktrace",
     "transport",
   ]
@@ -449,6 +450,7 @@
     "github.com/sony/sonyflake",
     "go.elastic.co/apm",
     "go.elastic.co/apm/module/apmgrpc",
+    "go.elastic.co/apm/module/apmlogrus",
     "google.golang.org/grpc",
     "google.golang.org/grpc/codes",
     "google.golang.org/grpc/grpclog",

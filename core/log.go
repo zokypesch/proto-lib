@@ -5,6 +5,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"go.elastic.co/apm"
+	"go.elastic.co/apm/module/apmlogrus"
 )
 
 // Logs for setup logs
@@ -25,4 +26,5 @@ var Logs = &logrus.Logger{
 // InitLogWithApm For initialLog
 func InitLogWithApm() {
 	apm.DefaultTracer.SetLogger(Logs)
+	Logs.AddHook(&apmlogrus.Hook{})
 }
