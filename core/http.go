@@ -9,6 +9,8 @@ import (
 	"google.golang.org/grpc"
 )
 
+var pattern_health_check_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"health"}, "", runtime.AssumeColonVerbOpt(false)))
+
 // RunHTTP for running http
 func RunHTTP(init func() error, registerHandler func(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error), GRPCAddress string, GRPCPort string, HTTPPort string) error {
 	if err := init(); err != nil {
@@ -33,7 +35,7 @@ func RunHTTP(init func() error, registerHandler func(ctx context.Context, mux *r
 // RunHTTPWithCustomMatcher for running http
 func RunHTTPWithCustomMatcher(init func() error, registerHandler func(ctx context.Context, mux *runtime.ServeMux,
 	endpoint string, opts []grpc.DialOption) (err error), customMatcher func(key string) (string, bool),
-	GRPCAddress string, GRPCPort string, HTTPPort string, patt runtime.Pattern) error {
+	GRPCAddress string, GRPCPort string, HTTPPort string) error {
 	if err := init(); err != nil {
 		return err
 	}
@@ -44,7 +46,7 @@ func RunHTTPWithCustomMatcher(init func() error, registerHandler func(ctx contex
 
 	mux := runtime.NewServeMux(runtime.WithIncomingHeaderMatcher(customMatcher))
 
-	mux.Handle("GET", patt, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_health_check_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		w.WriteHeader(200)
 	})
 
