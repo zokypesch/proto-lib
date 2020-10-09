@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	elastic "gopkg.in/olivere/elastic.v6"
+	elastic "github.com/olivere/elastic/v7"
 )
 
 // ESCore for struct information

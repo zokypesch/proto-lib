@@ -1,4 +1,4 @@
 # proto-lib
 
-git tag -a v0.4.0 -m "add without max"
+git tag -a v0.4.1 -m "upgrade elastic v 6"
 
