@@ -184,6 +184,17 @@
   version = "v2.0.2"
 
 [[projects]]
+  digest = "1:d8f4855f17dd02f2263ea714deecf47603eb58bdee3e897cb5d8348a900efef7"
+  name = "github.com/olivere/elastic"
+  packages = [
+    "config",
+    "uritemplates",
+  ]
+  pruneopts = "UT"
+  revision = "014540541696af47702756e881dbc577457f5274"
+  version = "v7.0.20"
+
+[[projects]]
   digest = "1:9e1d37b58d17113ec3cb5608ac0382313c5b59470b94ed97d0976e69c7022314"
   name = "github.com/pkg/errors"
   packages = ["."]
@@ -409,16 +420,12 @@
   version = "v1.28.0"
 
 [[projects]]
-  digest = "1:cf79e46600e2d01e781496ac0c6240deba0a572d365d1b8cbc349c5fd50c7e6c"
-  name = "gopkg.in/olivere/elastic.v5"
-  packages = [
-    ".",
-    "config",
-    "uritemplates",
-  ]
+  digest = "1:556cea717b567831c50a5ec92a259bb0a3b7ec3fd948981ccee7008a7a38a20f"
+  name = "gopkg.in/olivere/elastic.v6"
+  packages = ["."]
   pruneopts = "UT"
-  revision = "d00d2ad2f98b5bedbc8da0821338bf8b2c1b695a"
-  version = "v5.0.84"
+  revision = "88f72d0b7fff685d7ef9a014b3cf9f7916ec3718"
+  version = "v6.2.35"
 
 [[projects]]
   branch = "master"
@@ -456,7 +463,7 @@
     "google.golang.org/grpc/grpclog",
     "google.golang.org/grpc/metadata",
     "google.golang.org/grpc/status",
-    "gopkg.in/olivere/elastic.v5",
+    "gopkg.in/olivere/elastic.v6",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

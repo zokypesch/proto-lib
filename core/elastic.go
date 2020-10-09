@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	elastic "gopkg.in/olivere/elastic.v5"
+	elastic "gopkg.in/olivere/elastic.v6"
 )
 
 // ESCore for struct information
@@ -23,7 +23,7 @@ type ESModule interface {
 	GetQueryTerm(key string, value interface{}) *elastic.TermQuery
 	Query(ctx context.Context, termQuery *elastic.TermQuery, boolQuery *elastic.BoolQuery, agg map[string]elastic.Aggregation, offset int, size int, sortBy string, asc bool) ([]*elastic.SearchHit, int, error)
 	DeleteDocumentByID(ctx context.Context, ID string) error
-	UpdateDocument(ctx context.Context, ID string, script []*elastic.Script, upsert map[string]interface{}) (int, error)
+	UpdateDocument(ctx context.Context, ID string, script []*elastic.Script, upsert map[string]interface{}) (int64, error)
 	GetScriptLine(condition string, paramKey string, paramValue interface{}) *elastic.Script
 	GenerateScriptLines() []*elastic.Script
 	GenerateQueryTerms() []*elastic.TermQuery
@@ -237,7 +237,7 @@ func (es *ESCore) GetScriptLine(condition string, paramKey string, paramValue in
 }
 
 // UpdateDocument for updating a document
-func (es *ESCore) UpdateDocument(ctx context.Context, ID string, script []*elastic.Script, upsert map[string]interface{}) (int, error) {
+func (es *ESCore) UpdateDocument(ctx context.Context, ID string, script []*elastic.Script, upsert map[string]interface{}) (int64, error) {
 	query := es.client.Update().Index(es.indexName).Refresh("wait_for").Type(es.typeIndex).Id(ID)
 
 	if script != nil {

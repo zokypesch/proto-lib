@@ -1,4 +1,4 @@
 # proto-lib
 
-git tag -a v3.1.1 -m "Add health check"
+git tag -a v0.4.0 -m "add without max"
 
