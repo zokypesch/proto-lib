@@ -31,6 +31,7 @@ type ESModule interface {
 	GetClient() *elastic.Client
 	GetByID(ctx context.Context, ID string) (*elastic.GetResult, error)
 	GetBoolQuery(termQuery ...elastic.Query) *elastic.BoolQuery
+	GetBoolQueryV2(termQuery []*elastic.MatchQuery) *elastic.BoolQuery
 	GetNewMultiMatchQuery(key string, multiValue []string, operator string) *elastic.MultiMatchQuery
 	GetNewMatchQuery(key string, value interface{}) *elastic.MatchQuery
 	QueryCount(boolQuery *elastic.BoolQuery) (int64, error)
@@ -142,6 +143,16 @@ func (es *ESCore) GetBoolQuery(termQuery ...elastic.Query) *elastic.BoolQuery {
 	return boolQueryNew
 }
 
+// GetBoolQueryV2 for get boolquery
+func (es *ESCore) GetBoolQueryV2(termQuery []*elastic.MatchQuery) *elastic.BoolQuery {
+	boolQueryNew := elastic.NewBoolQuery()
+	for _, v := range termQuery {
+		boolQueryNew.Must(v)
+	}
+
+	return boolQueryNew
+}
+
 // GetNewRangeQuery for get new match query
 func (es *ESCore) GetNewRangeQuery(key string, from interface{}, end interface{}) *elastic.RangeQuery {
 	rangeQuery := elastic.NewRangeQuery(
@@ -174,10 +185,14 @@ func (es *ESCore) Query(ctx context.Context, termQuery *elastic.TermQuery,
 
 	query := es.client.Search().
 		Index(es.indexName).
-		Type(es.typeIndex).      // search in index
-		Sort(sortBy, asc).       // sort by param field, ascending
-		From(offset).Size(size). // take documents by param
-		Pretty(true)             // pretty print request and response JSON
+		Type(es.typeIndex) // search in index
+
+	if len(sortBy) > 0 {
+		query.Sort(sortBy, asc) // sort by param field, ascending
+	}
+
+	query.From(offset).Size(size). // take documents by param
+					Pretty(true) // pretty print request and response JSON
 
 	for kAgg, vAgg := range agg {
 		if vAgg != nil {
