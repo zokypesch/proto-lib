@@ -5,18 +5,20 @@ import (
 	"fmt"
 	"net/http"
 
-	runtime "github.com/grpc-ecosystem/grpc-gateway/runtime"
+	runtime "github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 )
 
-var pattern_health_check_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"health"}, "", runtime.AssumeColonVerbOpt(false)))
+var pattern_health_check_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"health"}, ""))
 
 // RunHTTP for running http
 func RunHTTP(init func() error, registerHandler func(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error), GRPCAddress string, GRPCPort string, HTTPPort string) error {
 	if err := init(); err != nil {
 		return err
 	}
-	runtime.HTTPError = CustomHTTPError
+	// breaking in version 2
+	// runtime.HTTPError = CustomHTTPError
+	runtime.WithErrorHandler(CustomHTTPError)
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -39,7 +41,10 @@ func RunHTTPWithCustomMatcher(init func() error, registerHandler func(ctx contex
 	if err := init(); err != nil {
 		return err
 	}
-	runtime.HTTPError = CustomHTTPError
+	// breaking in version 2
+	// runtime.HTTPError = CustomHTTPError
+	runtime.WithErrorHandler(CustomHTTPError)
+
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()

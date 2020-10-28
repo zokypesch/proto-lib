@@ -15,7 +15,7 @@ import (
 	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
-	runtime "github.com/grpc-ecosystem/grpc-gateway/runtime"
+	runtime "github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	logrus "github.com/sirupsen/logrus"
@@ -95,7 +95,8 @@ var re = regexp.MustCompile("\\[(.*?)\\]")
 func CustomHTTPError(ctx context.Context, _ *runtime.ServeMux, marshaler runtime.Marshaler, w http.ResponseWriter, _ *http.Request, err error) {
 	const fallback = `{"message": "failed to marshal error message", "success": false}`
 
-	w.Header().Set("Content-type", marshaler.ContentType())
+	// no longer needed in new version v2
+	// w.Header().Set("Content-type", marshaler.ContentType())
 	// w.Header().Set("Access-Control-Allow-Origin", "*")
 	// w.Header().Set("Access-Control-Allow-Credentials", "true")
 	// w.Header().Set("Access-Control-Allow-Methods", "OPTIONS, POST, GET, PUT, DELETE, PATCH")
