@@ -23,4 +23,5 @@ require (
 	go.elastic.co/apm/module/apmlogrus v1.8.0
 	google.golang.org/grpc v1.33.1
 	google.golang.org/grpc/examples v0.0.0-20201028002921-15a78f19307d // indirect
+	google.golang.org/protobuf v1.25.0
 )

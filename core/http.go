@@ -44,7 +44,6 @@ func RunHTTPWithCustomMatcher(init func() error, registerHandler func(ctx contex
 	// breaking in version 2
 	// runtime.HTTPError = CustomHTTPError
 	runtime.WithErrorHandler(CustomHTTPError)
-
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
