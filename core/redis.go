@@ -134,7 +134,24 @@ func (cache *Cache) Increment(key string) (int64, error) {
 	if err != nil {
 		return ok, fmt.Errorf("error checking if key %s exists: %v", key, err)
 	}
+
 	return ok, err
+}
+
+// IncrementWithCounter for increment with counter
+func (cache *Cache) IncrementWithCounter(key string, ttl int64) (int64, error) {
+	val, err := cache.Increment(key)
+	if err != nil {
+		return val, err
+	}
+
+	conn := cache.Pool.Get()
+	_, err = conn.Do("EXPIRE", key, ttl)
+
+	if err != nil {
+		return val, fmt.Errorf("error setting expire key %s to %d: %v", key, ttl, err)
+	}
+	return val, nil
 }
 
 // Delete delete by keys
