@@ -19,6 +19,7 @@ type CacheService interface {
 	Exists(key string) (bool, error)
 	Delete(key string) error
 	Increment(key string) (int64, error)
+	IncrementWithTTL(key string, ttl int64) (int64, error)
 }
 
 var cache CacheService
@@ -138,8 +139,8 @@ func (cache *Cache) Increment(key string) (int64, error) {
 	return ok, err
 }
 
-// IncrementWithCounter for increment with counter
-func (cache *Cache) IncrementWithCounter(key string, ttl int64) (int64, error) {
+// IncrementWithTTL for increment with counter
+func (cache *Cache) IncrementWithTTL(key string, ttl int64) (int64, error) {
 	val, err := cache.Increment(key)
 	if err != nil {
 		return val, err

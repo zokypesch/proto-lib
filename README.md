@@ -1,4 +1,4 @@
 # proto-lib
 
-git tag -a v0.4.1 -m "upgrade elastic v 6"
+git tag -a v0.4.7 -m "add counter with expire"
 
