@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/http/httputil"
 	"os"
 	"regexp"
 	"strings"
@@ -92,7 +93,7 @@ func LocalForward(ctx context.Context, mux *runtime.ServeMux, marshaler runtime.
 var re = regexp.MustCompile("\\[(.*?)\\]")
 
 // CustomHTTPError for hadling custom message error
-func CustomHTTPError(ctx context.Context, _ *runtime.ServeMux, marshaler runtime.Marshaler, w http.ResponseWriter, _ *http.Request, err error) {
+func CustomHTTPError(ctx context.Context, _ *runtime.ServeMux, marshaler runtime.Marshaler, w http.ResponseWriter, req *http.Request, err error) {
 	const fallback = `{"message": "failed to marshal error message", "success": false}`
 
 	w.Header().Set("Content-type", marshaler.ContentType())
@@ -100,7 +101,8 @@ func CustomHTTPError(ctx context.Context, _ *runtime.ServeMux, marshaler runtime
 	// w.Header().Set("Access-Control-Allow-Credentials", "true")
 	// w.Header().Set("Access-Control-Allow-Methods", "OPTIONS, POST, GET, PUT, DELETE, PATCH")
 
-	w.WriteHeader(runtime.HTTPStatusFromCode(grpc.Code(err)))
+	httpStatusFromCode := runtime.HTTPStatusFromCode(grpc.Code(err))
+	w.WriteHeader(httpStatusFromCode)
 	code := "9999"
 	errString := grpc.ErrorDesc(err)
 	findErrorCode := re.FindStringSubmatch(errString)
@@ -110,11 +112,27 @@ func CustomHTTPError(ctx context.Context, _ *runtime.ServeMux, marshaler runtime
 		code = findErrorCode[1]
 		errWithoutCode = strings.TrimSpace(strings.Replace(errString, fmt.Sprintf("[%s]", code), "", -1))
 	}
-	jErr := json.NewEncoder(w).Encode(errorBody{
+	respBody := errorBody{
 		Err:     errWithoutCode,
 		Success: false,
 		Code:    code,
+	}
+	jErr := json.NewEncoder(w).Encode(respBody)
+
+	Logs.ReportCaller = false
+	toLog := AddCtxToLog(ctx, Logs)
+	toLog = toLog.WithFields(logrus.Fields{
+		"request": func() string {
+			body, _ := httputil.DumpRequest(req, true)
+			return string(body)
+		}(),
+		"response": fmt.Sprintf("%s", map[string]interface{}{
+			"statusCode": httpStatusFromCode,
+			"content":    respBody,
+			"errCode":    code,
+		}),
 	})
+	toLog.Error(err.Error())
 
 	if jErr != nil {
 		w.Write([]byte(fallback))
