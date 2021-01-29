@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus/ctxlogrus"
 	"log"
 	"net/http"
+	"net/http/httputil"
 	"os"
 	"regexp"
 	"strings"
@@ -92,7 +94,7 @@ func LocalForward(ctx context.Context, mux *runtime.ServeMux, marshaler runtime.
 var re = regexp.MustCompile("\\[(.*?)\\]")
 
 // CustomHTTPError for hadling custom message error
-func CustomHTTPError(ctx context.Context, _ *runtime.ServeMux, marshaler runtime.Marshaler, w http.ResponseWriter, _ *http.Request, err error) {
+func CustomHTTPError(ctx context.Context, _ *runtime.ServeMux, marshaler runtime.Marshaler, w http.ResponseWriter, req *http.Request, err error) {
 	const fallback = `{"message": "failed to marshal error message", "success": false}`
 
 	// no longer needed in new version v2
@@ -101,7 +103,8 @@ func CustomHTTPError(ctx context.Context, _ *runtime.ServeMux, marshaler runtime
 	// w.Header().Set("Access-Control-Allow-Credentials", "true")
 	// w.Header().Set("Access-Control-Allow-Methods", "OPTIONS, POST, GET, PUT, DELETE, PATCH")
 
-	w.WriteHeader(runtime.HTTPStatusFromCode(grpc.Code(err)))
+	httpStatusFromCode := runtime.HTTPStatusFromCode(grpc.Code(err))
+	w.WriteHeader(httpStatusFromCode)
 	code := "9999"
 	errString := grpc.ErrorDesc(err)
 	findErrorCode := re.FindStringSubmatch(errString)
@@ -111,11 +114,27 @@ func CustomHTTPError(ctx context.Context, _ *runtime.ServeMux, marshaler runtime
 		code = findErrorCode[1]
 		errWithoutCode = strings.TrimSpace(strings.Replace(errString, fmt.Sprintf("[%s]", code), "", -1))
 	}
-	jErr := json.NewEncoder(w).Encode(errorBody{
+	respBody := errorBody{
 		Err:     errWithoutCode,
 		Success: false,
 		Code:    code,
+	}
+	jErr := json.NewEncoder(w).Encode(respBody)
+
+	Logs.ReportCaller = false
+	toLog := AddCtxToLog(ctx, Logs)
+	toLog = toLog.WithFields(logrus.Fields{
+		"request": func() string {
+			body, _ := httputil.DumpRequest(req, true)
+			return string(body)
+		}(),
+		"response": fmt.Sprintf("%s", map[string]interface{}{
+			"statusCode": httpStatusFromCode,
+			"content":    respBody,
+			"errCode":    code,
+		}),
 	})
+	toLog.Error(err.Error())
 
 	if jErr != nil {
 		w.Write([]byte(fallback))
@@ -125,24 +144,48 @@ func CustomHTTPError(ctx context.Context, _ *runtime.ServeMux, marshaler runtime
 // customLogger for custome logger
 func customLogger(code codes.Code) logrus.Level {
 	if code == codes.OK {
+		Logs.SetOutput(os.Stdout)
 		return logrus.InfoLevel
 	}
 
-	return logrus.WarnLevel
+	Logs.SetOutput(os.Stderr)
+	return logrus.ErrorLevel
+}
+
+// DefaultMessageProducer writes the default message
+func CustomMessageProducer(ctx context.Context, format string, level logrus.Level, code codes.Code, err error, fields logrus.Fields) {
+	if err != nil {
+		fields[logrus.ErrorKey] = err
+	}
+	entry := ctxlogrus.Extract(ctx).WithContext(ctx).WithFields(fields)
+	switch level {
+	case logrus.DebugLevel:
+		entry.Debugf(format)
+	case logrus.InfoLevel:
+		entry.Infof(format)
+	case logrus.WarnLevel:
+		entry.Warningf(format)
+	case logrus.ErrorLevel:
+		entry.Errorf(format)
+	case logrus.FatalLevel:
+		entry.Fatalf(format)
+	case logrus.PanicLevel:
+		entry.Panicf(format)
+	}
 }
 
 // CreateLogger for creating logger
 func CreateLogger() ([]grpc_logrus.Option, *logrus.Entry) {
-	logger := &logrus.Logger{}
-	logger.SetFormatter(&logrus.TextFormatter{})
-	logger.SetOutput(os.Stdout)
-	logger.SetLevel(logrus.InfoLevel)
+	logger := Logs
+	logger.ReportCaller = false
 	customFunc := customLogger
+	customMessage := CustomMessageProducer
 
 	logrusEntry := logrus.NewEntry(logger)
 
 	opts := []grpc_logrus.Option{
 		grpc_logrus.WithLevels(customFunc),
+		grpc_logrus.WithMessageProducer(customMessage),
 	}
 
 	grpc_logrus.ReplaceGrpcLogger(logrusEntry)
@@ -306,6 +349,12 @@ func RegisterGRPCWithARM(srvName string, interceptor ...grpc.UnaryServerIntercep
 	intercep := append(interceptor,
 		grpc_ctxtags.UnaryServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
 		grpc_logrus.UnaryServerInterceptor(logrusEntry, opts...),
+		grpc_logrus.PayloadUnaryServerInterceptor(
+			logrusEntry,
+			func(ctx context.Context, fullMethodName string, servingObject interface{}) bool {
+				return true
+			},
+		),
 		apmgrpc.NewUnaryServerInterceptor(apmgrpc.WithRecovery()),
 	)
 
