@@ -2,3 +2,4 @@ vendor/
 *.local
 promet/
 notes/
+.idea/
