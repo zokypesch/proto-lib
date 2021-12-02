@@ -235,8 +235,8 @@ var (
 	customizedCounterMetric *prometheus.CounterVec
 )
 
-func GetPrometheusHandler(opts promhttp.HandlerOpts) http.Handler {
-	return promhttp.HandlerFor(reg, opts)
+func GetPrometheusHandler() http.Handler {
+	return promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg})
 }
 
 func registerCustomizeMetrics(svc string) {
