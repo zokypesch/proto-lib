@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 
 	runtime "github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -10,6 +11,7 @@ import (
 )
 
 var pattern_health_check_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"health"}, ""))
+var pattern_metrics_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"metrics"}, ""))
 
 // RunHTTP for running http
 func RunHTTP(init func() error, registerHandler func(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error), GRPCAddress string, GRPCPort string, HTTPPort string) error {
@@ -52,6 +54,10 @@ func RunHTTPWithCustomMatcher(init func() error, registerHandler func(ctx contex
 
 	mux.Handle("GET", pattern_health_check_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		w.WriteHeader(200)
+	})
+
+	mux.Handle("GET", pattern_metrics_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		promhttp.Handler()
 	})
 
 	opts := []grpc.DialOption{grpc.WithInsecure()}
