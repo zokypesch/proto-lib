@@ -57,7 +57,7 @@ func RunHTTPWithCustomMatcher(init func() error, registerHandler func(ctx contex
 	})
 
 	mux.Handle("GET", pattern_metrics_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		promhttp.Handler()
+		GetPrometheusHandler(promhttp.HandlerOpts{})
 	})
 
 	opts := []grpc.DialOption{grpc.WithInsecure()}
@@ -69,3 +69,5 @@ func RunHTTPWithCustomMatcher(init func() error, registerHandler func(ctx contex
 
 	return http.ListenAndServe(fmt.Sprintf(":%s", HTTPPort), mux)
 }
+
+
