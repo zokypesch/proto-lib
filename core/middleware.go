@@ -339,6 +339,36 @@ func RegisterGRPCWithInterceptor(srvName string, interceptor ...grpc.UnaryServer
 	return server
 }
 
+func RegisterGRPCWithPromethAndARM(srvName string, interceptor ...grpc.UnaryServerInterceptor) *grpc.Server {
+	opts, logrusEntry := CreateLogger()
+	registerCustomizeMetrics(srvName)
+
+	serviceName = srvName + "_counter"
+
+	intercep := append(interceptor,
+		grpc_ctxtags.UnaryServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
+		grpc_logrus.UnaryServerInterceptor(logrusEntry, opts...),
+		grpcMetrics.UnaryServerInterceptor(),
+		grpc_logrus.PayloadUnaryServerInterceptor(
+			logrusEntry,
+			func(ctx context.Context, fullMethodName string, servingObject interface{}) bool {
+				return true
+			},
+		),
+		apmgrpc.NewUnaryServerInterceptor(apmgrpc.WithRecovery()),
+	)
+
+	server := grpc.NewServer(
+		grpc.UnaryInterceptor(
+			grpc_middleware.ChainUnaryServer(
+				intercep...,
+			),
+		),
+		grpc.StreamInterceptor(grpcMetrics.StreamServerInterceptor()),
+	)
+	return server
+}
+
 // RegisterGRPCWithARM for registration GRPC With ARM
 func RegisterGRPCWithARM(srvName string, interceptor ...grpc.UnaryServerInterceptor) *grpc.Server {
 	opts, logrusEntry := CreateLogger()
