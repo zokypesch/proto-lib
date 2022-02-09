@@ -50,6 +50,12 @@ func RunHTTPWithCustomMatcherV2(init func() error, registerHandler func(ctx cont
 
 	mux := runtime.NewServeMux(runtime.WithIncomingHeaderMatcher(customMatcher))
 
+	opts := []grpc.DialOption{grpc.WithInsecure()}
+	err := registerHandler(ctx, mux, fmt.Sprintf("%s:%s", GRPCAddress, GRPCPort), opts)
+	if err != nil {
+		return err
+	}
+
 	mux.Handle("GET", pattern_health_check_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		w.WriteHeader(200)
 	})
@@ -58,13 +64,6 @@ func RunHTTPWithCustomMatcherV2(init func() error, registerHandler func(ctx cont
 	mux.Handle("GET", patternV1Health, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		w.WriteHeader(200)
 	})
-
-	opts := []grpc.DialOption{grpc.WithInsecure()}
-	err := registerHandler(ctx, mux, fmt.Sprintf("%s:%s", GRPCAddress, GRPCPort), opts)
-
-	if err != nil {
-		return err
-	}
 
 	return http.ListenAndServe(fmt.Sprintf(":%s", HTTPPort), mux)
 }
