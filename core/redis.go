@@ -157,7 +157,7 @@ func (cache *Cache) IncrementWithTTL(key string, ttl int64) (int64, error) {
 }
 
 // IncrementWithValue for increment with counter
-func (cache *Cache) IncrementWithValue(key string, value float64) (int64, error) {
+func (cache *Cache) IncrementWithValue(key string, value float64) error {
 	conn := cache.Pool.Get()
 	defer conn.Close()
 
