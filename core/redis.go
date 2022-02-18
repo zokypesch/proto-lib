@@ -20,6 +20,7 @@ type CacheService interface {
 	Delete(key string) error
 	Increment(key string) (int64, error)
 	IncrementWithTTL(key string, ttl int64) (int64, error)
+	IncrementWithValue(key string, value float64) error
 }
 
 var cache CacheService
@@ -153,6 +154,19 @@ func (cache *Cache) IncrementWithTTL(key string, ttl int64) (int64, error) {
 		return val, fmt.Errorf("error setting expire key %s to %d: %v", key, ttl, err)
 	}
 	return val, nil
+}
+
+// IncrementWithValue for increment with counter
+func (cache *Cache) IncrementWithValue(key string, value float64) error {
+	conn := cache.Pool.Get()
+	defer conn.Close()
+
+	ok, err := redis.Int64(conn.Do("INCRBY", key, value))
+	if err != nil {
+		return ok, fmt.Errorf("error checking if key %s exists: %v", key, err)
+	}
+
+	return ok, err
 }
 
 // Delete delete by keys
