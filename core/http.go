@@ -43,12 +43,15 @@ func RunHTTPWithCustomMatcher(init func() error, registerHandler func(ctx contex
 	}
 	// breaking in version 2
 	// runtime.HTTPError = CustomHTTPError
-	runtime.WithErrorHandler(CustomHTTPError)
+
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	mux := runtime.NewServeMux(runtime.WithIncomingHeaderMatcher(customMatcher))
+	mux := runtime.NewServeMux(
+		runtime.WithIncomingHeaderMatcher(customMatcher),
+		runtime.WithErrorHandler(CustomHTTPError),
+	)
 
 	mux.Handle("GET", pattern_health_check_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		w.WriteHeader(200)
