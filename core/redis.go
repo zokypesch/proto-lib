@@ -157,16 +157,16 @@ func (cache *Cache) IncrementWithTTL(key string, ttl int64) (int64, error) {
 }
 
 // IncrementWithValue for increment with counter
-func (cache *Cache) IncrementWithValue(key string, value float64) error {
+func (cache *Cache) IncrementWithValue(key string, value float64) (int64, error) {
 	conn := cache.Pool.Get()
 	defer conn.Close()
 
-	ok, err := redis.Int64(conn.Do("INCRBY", key, value))
+	v, err := redis.Int64(conn.Do("INCRBY", key, value))
 	if err != nil {
-		return ok, fmt.Errorf("error checking if key %s exists: %v", key, err)
+		return v, fmt.Errorf("error checking if key %s exists: %v", key, err)
 	}
 
-	return ok, err
+	return v, err
 }
 
 // Delete delete by keys
