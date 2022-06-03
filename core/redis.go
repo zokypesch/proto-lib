@@ -20,7 +20,7 @@ type CacheService interface {
 	Delete(key string) error
 	Increment(key string) (int64, error)
 	IncrementWithTTL(key string, ttl int64) (int64, error)
-	IncrementWithValue(key string, value float64) error
+	IncrementWithValue(key string, value float64) (int64, error)
 }
 
 var cache CacheService
