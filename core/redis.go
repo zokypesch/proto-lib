@@ -21,6 +21,7 @@ type CacheService interface {
 	Increment(key string) (int64, error)
 	IncrementWithTTL(key string, ttl int64) (int64, error)
 	IncrementWithValue(key string, value float64) (int64, error)
+	IncrementWithValueTTL(key string, ttl int64, value float64) (int64, error)
 }
 
 var cache CacheService
@@ -164,6 +165,24 @@ func (cache *Cache) IncrementWithValue(key string, value float64) (int64, error)
 	v, err := redis.Int64(conn.Do("INCRBY", key, value))
 	if err != nil {
 		return v, fmt.Errorf("error checking if key %s exists: %v", key, err)
+	}
+
+	return v, err
+}
+
+// IncrementWithValueTTL for increment with value with ttl
+func (cache *Cache) IncrementWithValueTTL(key string, ttl int64, value float64) (int64, error) {
+	conn := cache.Pool.Get()
+	defer conn.Close()
+
+	v, err := redis.Int64(conn.Do("INCRBY", key, value))
+	if err != nil {
+		return v, fmt.Errorf("error checking if key %s exists: %v", key, err)
+	}
+
+	_, err = conn.Do("EXPIRE", key, ttl)
+	if err != nil {
+		return v, fmt.Errorf("error setting expire key %s to %d: %v", key, ttl, err)
 	}
 
 	return v, err
