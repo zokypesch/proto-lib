@@ -16,10 +16,10 @@ import (
 	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
-	runtime "github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	logrus "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"go.elastic.co/apm/module/apmgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -46,6 +46,17 @@ type successResponse struct {
 
 // LocalForward for handling localforward append message
 func LocalForward(ctx context.Context, mux *runtime.ServeMux, marshaler runtime.Marshaler, w http.ResponseWriter, req *http.Request, resp protoreflect.ProtoMessage, opts ...func(context.Context, http.ResponseWriter, protoreflect.ProtoMessage) error) {
+	if md, ok := runtime.ServerMetadataFromContext(ctx); ok {
+		vals := md.HeaderMD.Get("x-request-id")
+		if len(vals) > 0 {
+			w.Header().Set("X-Request-Id", vals[0])
+		}
+		vals = md.HeaderMD.Get("x-service-id")
+		if len(vals) > 0 {
+			w.Header().Set("X-Service-Id", vals[0])
+		}
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	// w.Header().Set("Access-Control-Allow-Origin", "*")
 	// w.Header().Set("Access-Control-Allow-Credentials", "true")
