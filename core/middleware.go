@@ -106,6 +106,17 @@ var re = regexp.MustCompile("\\[(.*?)\\]")
 func CustomHTTPError(ctx context.Context, _ *runtime.ServeMux, marshaler runtime.Marshaler, w http.ResponseWriter, _ *http.Request, err error) {
 	const fallback = `{"message": "failed to marshal error message", "success": false}`
 
+	if md, ok := runtime.ServerMetadataFromContext(ctx); ok {
+		vals := md.HeaderMD.Get("x-request-id")
+		if len(vals) > 0 {
+			w.Header().Set("X-Request-Id", vals[0])
+		}
+		vals = md.HeaderMD.Get("x-service-id")
+		if len(vals) > 0 {
+			w.Header().Set("X-Service-Id", vals[0])
+		}
+	}
+
 	w.Header().Set("Content-type", marshaler.ContentType())
 	// w.Header().Set("Access-Control-Allow-Origin", "*")
 	// w.Header().Set("Access-Control-Allow-Credentials", "true")
