@@ -46,6 +46,17 @@ type successResponse struct {
 
 // LocalForward for handling localforward append message
 func LocalForward(ctx context.Context, mux *runtime.ServeMux, marshaler runtime.Marshaler, w http.ResponseWriter, req *http.Request, resp protoreflect.ProtoMessage, opts ...func(context.Context, http.ResponseWriter, protoreflect.ProtoMessage) error) {
+	if md, ok := runtime.ServerMetadataFromContext(ctx); ok {
+		vals := md.HeaderMD.Get("x-request-id")
+		if len(vals) > 0 {
+			w.Header().Set("X-Request-Id", vals[0])
+		}
+		vals = md.HeaderMD.Get("x-service-id")
+		if len(vals) > 0 {
+			w.Header().Set("X-Service-Id", vals[0])
+		}
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	// w.Header().Set("Access-Control-Allow-Origin", "*")
 	// w.Header().Set("Access-Control-Allow-Credentials", "true")
