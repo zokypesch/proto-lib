@@ -2,8 +2,9 @@ package core
 
 import (
 	"context"
-	"google.golang.org/grpc/metadata"
 	"os"
+
+	"google.golang.org/grpc/metadata"
 
 	"github.com/sirupsen/logrus"
 	"go.elastic.co/apm"
@@ -14,7 +15,7 @@ import (
 var Logs = &logrus.Logger{
 	Out:   os.Stdout,
 	Hooks: make(logrus.LevelHooks),
-	Level: logrus.DebugLevel,
+	Level: logrus.ErrorLevel,
 	Formatter: &logrus.JSONFormatter{
 		FieldMap: logrus.FieldMap{
 			logrus.FieldKeyTime:  "@timestamp",
