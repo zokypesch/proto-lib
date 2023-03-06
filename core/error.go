@@ -6,7 +6,6 @@ import (
 
 type ErrorInterface interface {
 	GetData() interface{}
-	Code() string
 	Error() string
 	GRPCStatus() *status.Status
 }
