@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus/ctxlogrus"
+	"google.golang.org/grpc/status"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -126,7 +127,8 @@ func CustomHTTPError(ctx context.Context, _ *runtime.ServeMux, marshaler runtime
 	// w.Header().Set("Access-Control-Allow-Credentials", "true")
 	// w.Header().Set("Access-Control-Allow-Methods", "OPTIONS, POST, GET, PUT, DELETE, PATCH")
 
-	httpStatusFromCode := runtime.HTTPStatusFromCode(grpc.Code(err))
+	errGrpcCode := grpc.Code(err)
+	httpStatusFromCode := runtime.HTTPStatusFromCode(errGrpcCode)
 	w.WriteHeader(httpStatusFromCode)
 	code := "9999"
 	errString := grpc.ErrorDesc(err)
@@ -137,16 +139,12 @@ func CustomHTTPError(ctx context.Context, _ *runtime.ServeMux, marshaler runtime
 		errWithoutCode = strings.TrimSpace(strings.Replace(errString, fmt.Sprintf("[%s]", code), "", -1))
 	}
 
-	var data interface{}
-	if errorCustom, ok := err.(ErrorInterface); ok {
-		data = errorCustom.GetData()
-	}
-
+	grpcStatus, _ := status.FromError(err)
 	respBody := errorBody{
 		Err:     errWithoutCode,
 		Success: false,
 		Code:    code,
-		Data:    data,
+		Data:    grpcStatus.Details(),
 	}
 	jErr := json.NewEncoder(w).Encode(respBody)
 
