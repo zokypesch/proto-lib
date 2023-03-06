@@ -14,7 +14,7 @@ import (
 var Logs = &logrus.Logger{
 	Out:   os.Stdout,
 	Hooks: make(logrus.LevelHooks),
-	Level: logrus.DebugLevel,
+	Level: logrus.ErrorLevel,
 	Formatter: &logrus.JSONFormatter{
 		FieldMap: logrus.FieldMap{
 			logrus.FieldKeyTime:  "@timestamp",

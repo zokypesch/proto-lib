@@ -32,9 +32,10 @@ type responseBody interface {
 }
 
 type errorBody struct {
-	Err     string `json:"message,omitempty"`
-	Success bool   `json:"success"`
-	Code    string `json:"errorCode"`
+	Err     string      `json:"message,omitempty"`
+	Success bool        `json:"success"`
+	Code    string      `json:"errorCode"`
+	Data    interface{} `json:"data"`
 }
 
 type successResponse struct {
@@ -130,16 +131,22 @@ func CustomHTTPError(ctx context.Context, _ *runtime.ServeMux, marshaler runtime
 	code := "9999"
 	errString := grpc.ErrorDesc(err)
 	findErrorCode := re.FindStringSubmatch(errString)
-
 	errWithoutCode := errString
 	if len(findErrorCode) > 0 {
 		code = findErrorCode[1]
 		errWithoutCode = strings.TrimSpace(strings.Replace(errString, fmt.Sprintf("[%s]", code), "", -1))
 	}
+
+	var data interface{}
+	if errorCustom, ok := err.(ErrorInterface); ok {
+		data = errorCustom.GetData()
+	}
+
 	respBody := errorBody{
 		Err:     errWithoutCode,
 		Success: false,
 		Code:    code,
+		Data:    data,
 	}
 	jErr := json.NewEncoder(w).Encode(respBody)
 
