@@ -36,7 +36,7 @@ type errorBody struct {
 	Err     string      `json:"message,omitempty"`
 	Success bool        `json:"success"`
 	Code    string      `json:"errorCode"`
-	Data    interface{} `json:"data"`
+	Details interface{} `json:"details"`
 }
 
 type successResponse struct {
@@ -149,7 +149,7 @@ func CustomHTTPError(ctx context.Context, _ *runtime.ServeMux, marshaler runtime
 		Err:     errWithoutCode,
 		Success: false,
 		Code:    code,
-		Data:    detail,
+		Details: detail,
 	}
 	jErr := json.NewEncoder(w).Encode(respBody)
 
