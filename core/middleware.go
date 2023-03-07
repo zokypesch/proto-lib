@@ -140,11 +140,16 @@ func CustomHTTPError(ctx context.Context, _ *runtime.ServeMux, marshaler runtime
 	}
 
 	grpcStatus, _ := status.FromError(err)
+	details := grpcStatus.Details()
+	var detail interface{}
+	if len(details) > 0 {
+		detail = details[0]
+	}
 	respBody := errorBody{
 		Err:     errWithoutCode,
 		Success: false,
 		Code:    code,
-		Data:    grpcStatus.Details(),
+		Data:    detail,
 	}
 	jErr := json.NewEncoder(w).Encode(respBody)
 
