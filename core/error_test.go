@@ -14,12 +14,12 @@ import (
 type DummyError struct {
 }
 
-func (d DummyError) Code() string {
+func (d DummyError) ErrCode() string {
 	return "ERR999"
 }
 
 func (d DummyError) Error() string {
-	return fmt.Sprintf("[%s] something went wrong", d.Code())
+	return fmt.Sprintf("[%s] something went wrong", d.ErrCode())
 }
 
 func (d DummyError) GRPCStatus() *status.Status {

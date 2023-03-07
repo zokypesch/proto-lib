@@ -10,7 +10,7 @@ import (
 )
 
 type ErrorInterface interface {
-	Code() string
+	ErrCode() string
 	Error() string
 	GRPCStatus() *status.Status
 	GetData() interface{}
@@ -19,6 +19,10 @@ type ErrorInterface interface {
 type CustomErrDataCode struct {
 	err  error
 	data interface{}
+}
+
+func (c CustomErrDataCode) GetData() interface{} {
+	return c.data
 }
 
 func NewCustomErrDataCode(err error, data interface{}) *CustomErrDataCode {
@@ -56,11 +60,11 @@ func (c CustomErrDataCode) GRPCStatus() *status.Status {
 	return status.New(codes.Unknown, fmt.Sprintf("[ERRPTL999] %s", c.err.Error()))
 }
 
-func (c CustomErrDataCode) Code() string {
+func (c CustomErrDataCode) ErrCode() string {
 	if se, ok := c.err.(interface {
-		Code() string
+		ErrCode() string
 	}); ok {
-		return se.Code()
+		return se.ErrCode()
 	}
 
 	return ""
