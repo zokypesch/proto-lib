@@ -18,7 +18,7 @@ require (
 	github.com/prometheus/procfs v0.2.0 // indirect
 	github.com/sirupsen/logrus v1.4.2
 	github.com/sony/sonyflake v1.0.0
-	go.elastic.co/apm v1.8.0
+	go.elastic.co/apm v1.11.0
 	go.elastic.co/apm/module/apmgrpc v1.8.0
 	go.elastic.co/apm/module/apmlogrus v1.8.0
 	google.golang.org/genproto v0.0.0-20201019141844-1ed22bb0c154
