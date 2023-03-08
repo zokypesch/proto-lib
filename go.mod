@@ -14,9 +14,8 @@ require (
 	github.com/jinzhu/gorm v1.9.16
 	github.com/oklog/ulid v1.3.1
 	github.com/olivere/elastic/v7 v7.0.20
-	github.com/prometheus/client_golang v1.7.1
-	github.com/prometheus/procfs v0.2.0 // indirect
-	github.com/sirupsen/logrus v1.4.2
+	github.com/prometheus/client_golang v1.11.1
+	github.com/sirupsen/logrus v1.6.0
 	github.com/sony/sonyflake v1.0.0
 	go.elastic.co/apm v1.8.0
 	go.elastic.co/apm/module/apmgrpc v1.8.0
@@ -24,5 +23,5 @@ require (
 	google.golang.org/genproto v0.0.0-20201019141844-1ed22bb0c154
 	google.golang.org/grpc v1.33.1
 	google.golang.org/grpc/examples v0.0.0-20201028002921-15a78f19307d // indirect
-	google.golang.org/protobuf v1.25.0
+	google.golang.org/protobuf v1.26.0-rc.1
 )
