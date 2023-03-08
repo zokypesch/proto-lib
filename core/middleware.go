@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus/ctxlogrus"
+	"google.golang.org/grpc/status"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -32,9 +33,10 @@ type responseBody interface {
 }
 
 type errorBody struct {
-	Err     string `json:"message,omitempty"`
-	Success bool   `json:"success"`
-	Code    string `json:"errorCode"`
+	Err     string      `json:"message,omitempty"`
+	Success bool        `json:"success"`
+	Code    string      `json:"errorCode"`
+	Details interface{} `json:"details"`
 }
 
 type successResponse struct {
@@ -46,6 +48,17 @@ type successResponse struct {
 
 // LocalForward for handling localforward append message
 func LocalForward(ctx context.Context, mux *runtime.ServeMux, marshaler runtime.Marshaler, w http.ResponseWriter, req *http.Request, resp protoreflect.ProtoMessage, opts ...func(context.Context, http.ResponseWriter, protoreflect.ProtoMessage) error) {
+	if md, ok := runtime.ServerMetadataFromContext(ctx); ok {
+		vals := md.HeaderMD.Get("x-request-id")
+		if len(vals) > 0 {
+			w.Header().Set("X-Request-Id", vals[0])
+		}
+		vals = md.HeaderMD.Get("x-service-id")
+		if len(vals) > 0 {
+			w.Header().Set("X-Service-Id", vals[0])
+		}
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	// w.Header().Set("Access-Control-Allow-Origin", "*")
 	// w.Header().Set("Access-Control-Allow-Credentials", "true")
@@ -97,27 +110,46 @@ var re = regexp.MustCompile("\\[(.*?)\\]")
 func CustomHTTPError(ctx context.Context, _ *runtime.ServeMux, marshaler runtime.Marshaler, w http.ResponseWriter, req *http.Request, err error) {
 	const fallback = `{"message": "failed to marshal error message", "success": false}`
 
+	if md, ok := runtime.ServerMetadataFromContext(ctx); ok {
+		vals := md.HeaderMD.Get("x-request-id")
+		if len(vals) > 0 {
+			w.Header().Set("X-Request-Id", vals[0])
+		}
+		vals = md.HeaderMD.Get("x-service-id")
+		if len(vals) > 0 {
+			w.Header().Set("X-Service-Id", vals[0])
+		}
+	}
+
 	// no longer needed in new version v2
 	w.Header().Set("Content-Type", "application/json")
 	// w.Header().Set("Access-Control-Allow-Origin", "*")
 	// w.Header().Set("Access-Control-Allow-Credentials", "true")
 	// w.Header().Set("Access-Control-Allow-Methods", "OPTIONS, POST, GET, PUT, DELETE, PATCH")
 
-	httpStatusFromCode := runtime.HTTPStatusFromCode(grpc.Code(err))
+	errGrpcCode := grpc.Code(err)
+	httpStatusFromCode := runtime.HTTPStatusFromCode(errGrpcCode)
 	w.WriteHeader(httpStatusFromCode)
 	code := "9999"
 	errString := grpc.ErrorDesc(err)
 	findErrorCode := re.FindStringSubmatch(errString)
-
 	errWithoutCode := errString
 	if len(findErrorCode) > 0 {
 		code = findErrorCode[1]
 		errWithoutCode = strings.TrimSpace(strings.Replace(errString, fmt.Sprintf("[%s]", code), "", -1))
 	}
+
+	grpcStatus, _ := status.FromError(err)
+	details := grpcStatus.Details()
+	var detail interface{}
+	if len(details) > 0 {
+		detail = details[0]
+	}
 	respBody := errorBody{
 		Err:     errWithoutCode,
 		Success: false,
 		Code:    code,
+		Details: detail,
 	}
 	jErr := json.NewEncoder(w).Encode(respBody)
 

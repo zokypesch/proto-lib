@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+// DO_NOT_GENERATE
+
+option go_package = "github.com/zokypesch/proto-lib/grpc/pb/protolib";
+package protolib;
+
+import "google/api/annotations.proto";
+import "github.com/zokypesch/proto-lib/proto/options.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+message DataMessage {
+  string Data = 1 [json_name = "data"];
+}
+
+message DummyInner {
+  string name = 1 [json_name = "name"];
+}
+
+message Dummy {
+    string Field1 = 1 [json_name = "field1"];
+    int32 Field2 = 2 [json_name = "field2"];
+    repeated DummyInner Field3 = 3 [json_name = "field3"];
+}
