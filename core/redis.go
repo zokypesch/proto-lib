@@ -15,6 +15,7 @@ type Cache struct {
 type CacheService interface {
 	Ping() error
 	Get(key string) ([]byte, error)
+	GetAndCheckExist(key string) ([]byte, bool, error)
 	Set(key string, value []byte, ttl int64) error
 	Exists(key string) (bool, error)
 	Delete(key string) error
@@ -89,6 +90,21 @@ func (cache *Cache) Get(key string) ([]byte, error) {
 		return data, fmt.Errorf("error getting key %s: %v", key, err)
 	}
 	return data, err
+}
+
+func (cache *Cache) GetAndCheckExist(key string) ([]byte, bool, error) {
+	conn := cache.Pool.Get()
+	defer conn.Close()
+
+	var data []byte
+	data, err := redis.Bytes(conn.Do("GET", key))
+	if err != nil {
+		if err == redis.ErrNil {
+			return nil, false, nil
+		}
+		return data, false, fmt.Errorf("error getting key %s: %v", key, err)
+	}
+	return data, true, nil
 }
 
 // Set set key, value
