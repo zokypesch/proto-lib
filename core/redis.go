@@ -23,6 +23,9 @@ type CacheService interface {
 	IncrementWithTTL(key string, ttl int64) (int64, error)
 	IncrementWithValue(key string, value float64) (int64, error)
 	IncrementWithValueTTL(key string, ttl int64, value float64) (int64, error)
+	ListRange(key string, start int64, end int64) ([]string, error)
+	ListPush(key string, value []byte) error
+	ListTrim(key string, start int64, end int64) error
 }
 
 var cache CacheService
@@ -212,4 +215,43 @@ func (cache *Cache) Delete(key string) error {
 
 	_, err := conn.Do("DEL", key)
 	return err
+}
+
+// ListRange keys for getting LRANGE based on keys
+func (cache *Cache) ListRange(key string, start int64, end int64) ([]string, error) {
+	conn := cache.Pool.Get()
+	defer conn.Close()
+
+	list, err := redis.Strings(conn.Do("LRANGE", key, start, end))
+	if err != nil {
+		return []string{}, fmt.Errorf("error on getting list range LRANGE key %s, start: %d, end: %d", key, start, end)
+	}
+
+	return list, nil
+}
+
+// ListPush operations for push any data to the list keys
+func (cache *Cache) ListPush(key string, value []byte) error {
+	conn := cache.Pool.Get()
+	defer conn.Close()
+
+	_, err := conn.Do("LPUSH", key, value)
+	if err != nil {
+		return fmt.Errorf("error on list push key %s, value: %s", key, string(value))
+	}
+
+	return nil
+}
+
+// ListTrim operations for trim any elements not in range
+func (cache *Cache) ListTrim(key string, start int64, end int64) error {
+	conn := cache.Pool.Get()
+	defer conn.Close()
+
+	_, err := conn.Do("LTRIM", key, start, end)
+	if err != nil {
+		return fmt.Errorf("error on list trim key %s", key)
+	}
+
+	return nil
 }
